@@ -24,7 +24,7 @@ require("dotenv").config();
 const ATLAS_URI = process.env.ATLAS_URI;
 const port = process.env.PORT || 3000;
 const ID = process.env.ID;
-const USERNAME = process.env.USERNAME;
+const USERNAME = "@translate_mar";
 const BEARER_TOKEN = process.env.BEARER_TOKEN;
 const RAPID_API_HOST = process.env.RAPID_API_HOST;
 const RAPID_API_KEY = process.env.RAPID_API_KEY;
@@ -72,23 +72,22 @@ function replyToTweet(tweetId, text, username, lastProcessedId) {
 async function translateText(text) {
   var options = {
     method: "POST",
-    url: "https://google-translate1.p.rapidapi.com/language/translate/v2",
+    url: "https://cheap-translate.p.rapidapi.com/goo/translate/",
     headers: {
-      "content-type": "application/x-www-form-urlencoded",
-      "accept-encoding": "application/gzip",
+      'content-type': 'application/json',
       "x-rapidapi-host": RAPID_API_HOST,
       "x-rapidapi-key": RAPID_API_KEY,
     },
-    data: qs.stringify({ q: text, target: "mar" }),
+    data: {fromLang: 'auto-detect', text: text, to: 'mr'}
   };
   console.log("options");
   console.log(options);
 
   const response = await axios(options);
 
-  console.log(response.data.data.translations[0].translatedText);
+  console.log(response.data.translatedText);
 
-  return response.data.data.translations[0].translatedText;
+  return response.data.translatedText;
 }
 
 async function fetchMentions() {
@@ -142,7 +141,7 @@ async function fetchMentions() {
 
             return {
               id: tweet.id,
-              text: tweet.text.replace(/\n/g, " ").replace(`@${USERNAME}`, ""),
+              text: tweet.text.replace(/\n/g, " ").replace(USERNAME, ""),
               username: username,
             };
           }
@@ -167,6 +166,7 @@ async function fetchMentions() {
     setTimeout(fetchMentions, 30000);
   } catch (err) {
     console.log(err);
+    setTimeout(fetchMentions, 30000);
   }
 }
 
