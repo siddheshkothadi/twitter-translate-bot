@@ -24,7 +24,7 @@ require("dotenv").config();
 const ATLAS_URI = process.env.ATLAS_URI;
 const port = process.env.PORT || 3000;
 const ID = process.env.ID;
-const USERNAME = "@translate_mar";
+const USERNAME = process.env.USERNAME;
 const BEARER_TOKEN = process.env.BEARER_TOKEN;
 const RAPID_API_HOST = process.env.RAPID_API_HOST;
 const RAPID_API_KEY = process.env.RAPID_API_KEY;
