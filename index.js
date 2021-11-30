@@ -2,7 +2,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const axios = require("axios").default;
-let qs = require("qs");
 const Twit = require("twit");
 
 const lastIdProcessedSchema = new Schema({
