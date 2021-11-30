@@ -45,7 +45,7 @@ const T = new Twit({
 });
 
 function replyToTweet(tweetId, text, username, lastProcessedId) {
-  const finalTweetText = `@${username} ${text}`;
+  const finalTweetText = `@${username} ${text}`
   T.post(
     "statuses/update",
     {
@@ -82,14 +82,12 @@ async function translateText(text) {
       "x-rapidapi-host": RAPID_API_HOST,
       "x-rapidapi-key": RAPID_API_KEY,
     },
-    data: {fromLang: 'auto-detect', text: text, to: 'mr'}
+    data: {fromLang: 'auto-detect', text: text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, ''), to: 'mr'}
   };
   console.log("options");
   console.log(options);
 
   const response = await axios(options);
-
-  console.log(response.data.translatedText);
 
   return response.data.translatedText;
 }
@@ -97,7 +95,7 @@ async function translateText(text) {
 async function fetchMentions() {
   try {
     const lastProcessedId = await LastIdProcessed.findOne({});
-    const sinceId = lastProcessedId?.sinceId;
+    const sinceId = lastProcessedId.sinceId;
     console.log("last processed id is", sinceId);
 
     let tweetMentionURL = `https://api.twitter.com/2/users/${ID}/mentions?expansions=referenced_tweets.id,referenced_tweets.id.author_id`;
