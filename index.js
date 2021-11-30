@@ -20,8 +20,8 @@ const app = express();
 app.use(express.json());
 require("dotenv").config();
 
-app.get('/', (req, res) => {
-  res.send('I\'m alive');
+app.get("/", (req, res) => {
+  res.send("I'm alive");
 });
 
 const ATLAS_URI = process.env.ATLAS_URI;
@@ -44,11 +44,32 @@ const T = new Twit({
 });
 
 function replyToTweet(tweetId, text, username, lastProcessedId) {
-  const finalTweetText = `@${username} ${text}`
+  const tweetText = `@${username} ${text}`;
+
+  const firstTweetWords = [];
+  const secondTweetWords = [];
+
+  const words = tweetText.split(" ");
+
+  let charCount = 0;
+
+  for (let word in words) {
+    charCount += words[word].length + 1;
+
+    if (charCount > 280) {
+      secondTweetWords.push(words[word]);
+    } else {
+      firstTweetWords.push(words[word]);
+    }
+  }
+
+  console.log("first tweet words", firstTweetWords);
+  console.log("second tweet words", secondTweetWords);
+
   T.post(
     "statuses/update",
     {
-      status: finalTweetText,
+      status: firstTweetWords.join(" "),
       in_reply_to_status_id: tweetId,
     },
     function (err, data, response) {
@@ -56,6 +77,9 @@ function replyToTweet(tweetId, text, username, lastProcessedId) {
         console.log(err);
       } else {
         console.log(data);
+
+        const secondTweetId = data.id_str;
+
         // Update the last processed id
         lastProcessedId.sinceId = tweetId;
         console.log("updating last processed id to", tweetId);
@@ -63,6 +87,35 @@ function replyToTweet(tweetId, text, username, lastProcessedId) {
           .save()
           .then(() => {
             console.log("updated last processed id");
+            T.post(
+              "statuses/update",
+              {
+                status: "@translate_mar " + secondTweetWords.join(" "),
+                in_reply_to_status_id: secondTweetId,
+              },
+              function (err, data, response) {
+                if (err) {
+                  console.log(err);
+                } else {
+                  console.log(data);
+                  
+                  const thirdTweetId = data.id_str;
+
+                  lastProcessedId.sinceId = thirdTweetId;
+
+                  console.log("updating last processed id to", thirdTweetId);
+
+                  lastProcessedId
+                    .save()
+                    .then(() => {
+                      console.log("updated last processed id");
+                    })
+                    .catch((err) => {
+                      console.log(err);
+                    }); 
+                }
+              }
+            );
           })
           .catch((err) => {
             console.log(err);
@@ -77,11 +130,15 @@ async function translateText(text) {
     method: "POST",
     url: `https://${RAPID_API_HOST}/goo/translate/`,
     headers: {
-      'content-type': 'application/json',
+      "content-type": "application/json",
       "x-rapidapi-host": RAPID_API_HOST,
       "x-rapidapi-key": RAPID_API_KEY,
     },
-    data: {fromLang: 'auto-detect', text: text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, ''), to: 'mr'}
+    data: {
+      fromLang: "auto-detect",
+      text: text.replace(/(?:https?|ftp):\/\/[\n\S]+/g, ""),
+      to: "mr",
+    },
   };
   console.log("options");
   console.log(options);
