@@ -21,6 +21,10 @@ const app = express();
 app.use(express.json());
 require("dotenv").config();
 
+app.get('/', (req, res) => {
+  res.send('I\'m alive');
+});
+
 const ATLAS_URI = process.env.ATLAS_URI;
 const port = process.env.PORT || 3000;
 const ID = process.env.ID;
