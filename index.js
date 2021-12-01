@@ -180,9 +180,18 @@ async function fetchMentions() {
             const tweetText = includes.tweets
               .find((tweet) => tweet.id === tweetId)
               .text.replace(/\n/g, " ");
+            
             const username = includes.users.find(
               (user) => user.id === tweet.author_id
             ).username;
+
+            if(tweetText.includes("@translate_mar")) {
+              return {
+                id: tweet.id,
+                text: null,
+                username: username,
+              }
+            }
 
             return {
               id: tweet.id,
@@ -213,9 +222,25 @@ async function fetchMentions() {
 
       // Translate all tweets and reply them one by one
       for (const tweet of tweetsToReplyTo) {
-        const translatedText = await translateText(tweet.text.trim());
-        console.log("translated text is", translatedText);
-        replyToTweet(tweet.id, translatedText, tweet.username, lastProcessedId);
+        if(tweet.text) {
+          const translatedText = await translateText(tweet.text.trim());
+          console.log("translated text is", translatedText);
+          replyToTweet(tweet.id, translatedText, tweet.username, lastProcessedId);
+        }
+        else {
+          console.log("not translating tweet");
+          lastProcessedId.sinceId = tweet.id;
+          console.log("updating last processed id to", tweet.id);
+          lastProcessedId
+            .save()
+            .then(() => {
+              console.log("updated last processed id");
+            }
+            )
+            .catch((err) => {
+              console.log(err);
+            });
+        }
       }
     } else {
       console.log("no tweets to reply to");
