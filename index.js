@@ -27,7 +27,7 @@ app.get("/", (req, res) => {
 const ATLAS_URI = process.env.ATLAS_URI;
 const port = process.env.PORT || 3000;
 const ID = process.env.ID;
-const USERNAME = process.env.USERNAME;
+const TWITTER_USERNAME = process.env.TWITTER_USERNAME | "@translate_mar";
 const BEARER_TOKEN = process.env.BEARER_TOKEN;
 const RAPID_API_HOST = process.env.RAPID_API_HOST;
 const RAPID_API_KEY = process.env.RAPID_API_KEY;
@@ -87,35 +87,38 @@ function replyToTweet(tweetId, text, username, lastProcessedId) {
           .save()
           .then(() => {
             console.log("updated last processed id");
-            T.post(
-              "statuses/update",
-              {
-                status: "@translate_mar " + secondTweetWords.join(" "),
-                in_reply_to_status_id: secondTweetId,
-              },
-              function (err, data, response) {
-                if (err) {
-                  console.log(err);
-                } else {
-                  console.log(data);
-                  
-                  const thirdTweetId = data.id_str;
+            
+            if (secondTweetWords.length > 0) {
+              T.post(
+                "statuses/update",
+                {
+                  status: TWITTER_USERNAME + " " + secondTweetWords.join(" "),
+                  in_reply_to_status_id: secondTweetId,
+                },
+                function (err, data, response) {
+                  if (err) {
+                    console.log(err);
+                  } else {
+                    console.log(data);
+                    
+                    const thirdTweetId = data.id_str;
 
-                  lastProcessedId.sinceId = thirdTweetId;
+                    lastProcessedId.sinceId = thirdTweetId;
 
-                  console.log("updating last processed id to", thirdTweetId);
+                    console.log("updating last processed id to", thirdTweetId);
 
-                  lastProcessedId
-                    .save()
-                    .then(() => {
-                      console.log("updated last processed id");
-                    })
-                    .catch((err) => {
-                      console.log(err);
-                    }); 
+                    lastProcessedId
+                      .save()
+                      .then(() => {
+                        console.log("updated last processed id");
+                      })
+                      .catch((err) => {
+                        console.log(err);
+                      }); 
+                  }
                 }
-              }
-            );
+              );
+            }
           })
           .catch((err) => {
             console.log(err);
@@ -185,7 +188,7 @@ async function fetchMentions() {
               (user) => user.id === tweet.author_id
             ).username;
 
-            if(tweetText.includes("@translate_mar")) {
+            if(tweetText.includes(TWITTER_USERNAME)) {
               return {
                 id: tweet.id,
                 text: null,
@@ -208,7 +211,7 @@ async function fetchMentions() {
 
             return {
               id: tweet.id,
-              text: tweet.text.replace(/\n/g, " ").replace(USERNAME, ""),
+              text: tweet.text.replace(/\n/g, " ").replace(TWITTER_USERNAME, ""),
               username: username,
             };
           }
