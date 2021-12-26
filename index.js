@@ -128,7 +128,7 @@ function replyToTweet(tweetId, text, username, lastProcessedId) {
 async function translateText(text) {
   var options = {
     method: "POST",
-    url: `https://${RAPID_API_HOST}/goo/translate/`,
+    url: `https://${RAPID_API_HOST}/translate/`,
     headers: {
       "content-type": "application/json",
       "x-rapidapi-host": RAPID_API_HOST,
