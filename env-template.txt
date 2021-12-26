@@ -2,7 +2,7 @@
 Use this template to create your .env file
 ===========================================
 
-USERNAME= Your or bot's username with '@' symbol as a prefix
+TWITTER_USERNAME= Your or bot's username with '@' symbol as a prefix
 ID= Your twitter id which uniquely identifies your account
 BEARER_TOKEN= Bearer Token generated for Twitter API v2 essential access
 ATLAS_URI= Mongo DB atlas URI
